@@ -221,17 +221,57 @@ export default function Home() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {TONES.map((t) => (
                       <Button
-                        key={t.value}
-                        variant={tone === t.value ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setTone(t.value)}
-                        className="flex flex-col h-auto py-2"
-                      >
-                        <span className="font-semibold">{t.label}</span>
-                        <span className="text-xs opacity-70">
-                          {t.description}
-                        </span>
-                      </Button>
+                      key={t.value}
+                      variant={tone === t.value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTone(t.value)}
+                      className="flex flex-col h-auto py-2 items-start"
+                    >
+                      {/* 日本語 */}
+                      <span className="font-semibold">{t.label}</span>
+                      <span className="text-xs opacity-70">
+                        {t.description}
+                      </span>
+                    
+                      {/* 英語（または選択言語） */}
+                      {targetLang !== 'ja' && (
+                        <>
+                          <span className="font-semibold text-sm mt-1">
+                            {t.value === 'casual' && targetLang === 'en' && 'Casual'}
+                            {t.value === 'friendly' && targetLang === 'en' && 'Friendly'}
+                            {t.value === 'business' && targetLang === 'en' && 'Business'}
+                            {t.value === 'polite' && targetLang === 'en' && 'Polite'}
+                    
+                            {t.value === 'casual' && targetLang === 'es' && 'Casual'}
+                            {t.value === 'friendly' && targetLang === 'es' && 'Amigable'}
+                            {t.value === 'business' && targetLang === 'es' && 'Formal'}
+                            {t.value === 'polite' && targetLang === 'es' && 'Educado'}
+                    
+                            {t.value === 'casual' && targetLang === 'ca' && 'Casual'}
+                            {t.value === 'friendly' && targetLang === 'ca' && 'Amistós'}
+                            {t.value === 'business' && targetLang === 'ca' && 'Formal'}
+                            {t.value === 'polite' && targetLang === 'ca' && 'Educat'}
+                          </span>
+                    
+                          <span className="text-xs text-gray-500">
+                            {t.value === 'casual' && targetLang === 'en' && 'Relaxed tone'}
+                            {t.value === 'friendly' && targetLang === 'en' && 'Warm and friendly'}
+                            {t.value === 'business' && targetLang === 'en' && 'Formal tone'}
+                            {t.value === 'polite' && targetLang === 'en' && 'Polite tone'}
+                    
+                            {t.value === 'casual' && targetLang === 'es' && 'Tono relajado'}
+                            {t.value === 'friendly' && targetLang === 'es' && 'Cálido y cercano'}
+                            {t.value === 'business' && targetLang === 'es' && 'Formal'}
+                            {t.value === 'polite' && targetLang === 'es' && 'Educado'}
+                    
+                            {t.value === 'casual' && targetLang === 'ca' && 'To relaxat'}
+                            {t.value === 'friendly' && targetLang === 'ca' && 'Proper i amigable'}
+                            {t.value === 'business' && targetLang === 'ca' && 'Formal'}
+                            {t.value === 'polite' && targetLang === 'ca' && 'Educat'}
+                          </span>
+                        </>
+                      )}
+                    </Button>
                     ))}
                   </div>
                 </div>
