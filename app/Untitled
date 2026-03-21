@@ -1,0 +1,65 @@
+{/* 音声 + カメラ */}
+<div className="flex gap-2">
+  {/* 音声 */}
+  <Button
+    onClick={startSpeechRecognition}
+    className="w-1/2 h-12 bg-green-500 hover:bg-green-600 flex flex-col"
+  >
+    <span>
+      {sourceLang === 'ja' && '音声🎤'}
+      {sourceLang === 'en' && 'Voice🎤'}
+      {sourceLang === 'es' && 'Voz🎤'}
+      {sourceLang === 'ca' && 'Veu🎤'}
+    </span>
+    <span className="text-xs opacity-70">
+      {sourceLang === 'ja' && '音声入力'}
+      {sourceLang === 'en' && 'Speak'}
+      {sourceLang === 'es' && 'Hablar'}
+      {sourceLang === 'ca' && 'Parlar'}
+    </span>
+  </Button>
+
+  {/* カメラ */}
+  <Button
+    onClick={handleCamera}
+    className="w-1/2 h-12 bg-blue-500 hover:bg-blue-600 flex flex-col"
+  >
+    <span>
+      {sourceLang === 'ja' && 'カメラ📷'}
+      {sourceLang === 'en' && 'Camera📷'}
+      {sourceLang === 'es' && 'Cámara📷'}
+      {sourceLang === 'ca' && 'Càmera📷'}
+    </span>
+    <span className="text-xs opacity-70">
+      {sourceLang === 'ja' && '読み取り'}
+      {sourceLang === 'en' && 'Scan'}
+      {sourceLang === 'es' && 'Escanear'}
+      {sourceLang === 'ca' && 'Escanejar'}
+    </span>
+  </Button>
+</div>
+
+{/* 翻訳ボタン（大） */}
+<Button
+  onClick={handleTranslate}
+  disabled={isLoading || !sourceText.trim()}
+  className="w-full h-14 text-lg"
+  size="lg"
+>
+  {isLoading ? (
+    <>
+      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+      {sourceLang === 'ja' && '翻訳中...'}
+      {sourceLang === 'en' && 'Translating...'}
+      {sourceLang === 'es' && 'Traduciendo...'}
+      {sourceLang === 'ca' && 'Traduïnt...'}
+    </>
+  ) : (
+    <>
+      {sourceLang === 'ja' && '翻訳する✏️'}
+      {sourceLang === 'en' && 'Translate✏️'}
+      {sourceLang === 'es' && 'Traducir✏️'}
+      {sourceLang === 'ca' && 'Traduir✏️'}
+    </>
+  )}
+</Button>

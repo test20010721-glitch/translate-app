@@ -24,11 +24,12 @@ const LANGUAGES = [
 ];
 
 const TONES = [
-  { value: 'casual', label: 'カジュアル', description: 'リラックスした会話' },
-  { value: 'friendly', label: 'フレンドリー', description: '親しみやすい表現' },
-  { value: 'business', label: 'ビジネス', description: 'フォーマルな表現' },
-  { value: 'polite', label: '丁寧', description: '礼儀正しい表現' },
-];
+    { value: 'casual', label: 'カジュアル', description: 'リアルで自然な会話' },
+    { value: 'business', label: 'ビジネス', description: '仕事で使う自然な表現' },
+    { value: 'polite', label: '丁寧', description: '礼儀正しい表現' },
+    { value: 'email', label: 'メール用', description: 'ビジネス用の文章作成' },
+    { value: 'menu', label: 'メニュー', description: '料理の説明付き翻訳' },
+  ];
 
 export default function Home() {
   const [sourceText, setSourceText] = useState('');
@@ -38,6 +39,9 @@ export default function Home() {
   const [tone, setTone] = useState('casual');
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<Translation[]>([]);
+  const [isListening, setIsListening] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  
 
   useEffect(() => {
     loadHistory();
@@ -142,12 +146,94 @@ export default function Home() {
     setTone(item.tone);
   };
 
+  const getToneLabel = (tone: string, lang: string) => {
+    const labels: any = {
+      ja: {
+        casual: { title: 'カジュアル', desc: 'リアルで自然な会話' },
+        business: { title: 'ビジネス', desc: '仕事で使う自然な表現' },
+        polite: { title: '丁寧', desc: '礼儀正しい表現' },
+        email: { title: 'メール用', desc: 'ビジネス用の文章作成' },
+        menu: { title: 'メニュー', desc: '料理の説明付き' },
+      },
+      en: {
+        casual: { title: 'Casual', desc: 'Relaxed tone' },
+        business: { title: 'Business', desc: 'Professional tone' },
+        polite: { title: 'Polite', desc: 'Respectful tone' },
+        email: { title: 'Email', desc: 'Business email format' },
+        menu: { title: 'Menu', desc: 'Food explanation' },
+      },
+      es: {
+        casual: { title: 'Casual', desc: 'Tono relajado' },
+        business: { title: 'Formal', desc: 'Lenguaje profesional' },
+        polite: { title: 'Educado', desc: 'Tono respetuoso' },
+        email: { title: 'Correo', desc: 'Formato de email' },
+        menu: { title: 'Menú', desc: 'Explicación de comida' },
+      },
+      ca: {
+        casual: { title: 'Casual', desc: 'To relaxat' },
+        business: { title: 'Formal', desc: 'Llenguatge professional' },
+        polite: { title: 'Educat', desc: 'To respectuós' },
+        email: { title: 'Correu', desc: 'Format de correu' },
+        menu: { title: 'Menú', desc: 'Explicació del plat' },
+      },
+    };
+  
+    return labels[lang]?.[tone] || { title: tone, desc: '' };
+  };
+
   const getLanguageName = (code: string) => {
     return LANGUAGES.find((lang) => lang.code === code)?.name || code;
   };
 
   const getLanguageFlag = (code: string) => {
     return LANGUAGES.find((lang) => lang.code === code)?.flag || '';
+  };
+
+  const handleCamera = () => {
+    alert('📷 カメラ機能は次のステップで追加予定（まずUIだけ作成）');
+  };
+  
+  const startSpeechRecognition = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+  
+    if (!SpeechRecognition) {
+      alert('このブラウザは音声認識に対応していません');
+      return;
+    }
+  
+    const recognition = new SpeechRecognition();
+  
+    // 言語設定（ここ重要）
+    if (sourceLang === 'ja') {
+      recognition.lang = 'ja-JP';
+    } else if (sourceLang === 'es') {
+      recognition.lang = 'es-ES';
+    } else if (sourceLang === 'ca') {
+      recognition.lang = 'ca-ES';
+    } else {
+      recognition.lang = 'en-US';
+    }
+  
+    recognition.interimResults = false;
+  
+    setIsListening(true);
+    recognition.start();
+  
+    recognition.onresult = (event: any) => {
+      const text = event.results[0][0].transcript;
+      setSourceText(text);
+      setIsListening(false);
+    };
+  
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+  
+    recognition.onend = () => {
+      setIsListening(false);
+    };
   };
 
   return (
@@ -219,60 +305,36 @@ export default function Home() {
                     翻訳スタイル
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {TONES.map((t) => (
-                      <Button
-                      key={t.value}
-                      variant={tone === t.value ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setTone(t.value)}
-                      className="flex flex-col h-auto py-2 items-start"
-                    >
-                      {/* 日本語 */}
-                      <span className="font-semibold">{t.label}</span>
-                      <span className="text-xs opacity-70">
-                        {t.description}
-                      </span>
-                    
-                      {/* 英語（または選択言語） */}
-                      {targetLang !== 'ja' && (
-                        <>
-                          <span className="font-semibold text-sm mt-1">
-                            {t.value === 'casual' && targetLang === 'en' && 'Casual'}
-                            {t.value === 'friendly' && targetLang === 'en' && 'Friendly'}
-                            {t.value === 'business' && targetLang === 'en' && 'Business'}
-                            {t.value === 'polite' && targetLang === 'en' && 'Polite'}
-                    
-                            {t.value === 'casual' && targetLang === 'es' && 'Casual'}
-                            {t.value === 'friendly' && targetLang === 'es' && 'Amigable'}
-                            {t.value === 'business' && targetLang === 'es' && 'Formal'}
-                            {t.value === 'polite' && targetLang === 'es' && 'Educado'}
-                    
-                            {t.value === 'casual' && targetLang === 'ca' && 'Casual'}
-                            {t.value === 'friendly' && targetLang === 'ca' && 'Amistós'}
-                            {t.value === 'business' && targetLang === 'ca' && 'Formal'}
-                            {t.value === 'polite' && targetLang === 'ca' && 'Educat'}
-                          </span>
-                    
-                          <span className="text-xs text-gray-500">
-                            {t.value === 'casual' && targetLang === 'en' && 'Relaxed tone'}
-                            {t.value === 'friendly' && targetLang === 'en' && 'Warm and friendly'}
-                            {t.value === 'business' && targetLang === 'en' && 'Formal tone'}
-                            {t.value === 'polite' && targetLang === 'en' && 'Polite tone'}
-                    
-                            {t.value === 'casual' && targetLang === 'es' && 'Tono relajado'}
-                            {t.value === 'friendly' && targetLang === 'es' && 'Cálido y cercano'}
-                            {t.value === 'business' && targetLang === 'es' && 'Formal'}
-                            {t.value === 'polite' && targetLang === 'es' && 'Educado'}
-                    
-                            {t.value === 'casual' && targetLang === 'ca' && 'To relaxat'}
-                            {t.value === 'friendly' && targetLang === 'ca' && 'Proper i amigable'}
-                            {t.value === 'business' && targetLang === 'ca' && 'Formal'}
-                            {t.value === 'polite' && targetLang === 'ca' && 'Educat'}
-                          </span>
-                        </>
-                      )}
-                    </Button>
-                    ))}
+                  {TONES.map((t) => {
+  const main = getToneLabel(t.value, sourceLang);
+  const sub = getToneLabel(t.value, targetLang);
+
+  return (
+    <Button
+      key={t.value}
+      variant={tone === t.value ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setTone(t.value)}
+      className="flex flex-col h-auto py-2 items-start"
+    >
+      {/* メイン（左の言語） */}
+      <span className="font-semibold">{main.title}</span>
+      <span className="text-xs opacity-70">{main.desc}</span>
+
+      {/* サブ（右の言語） */}
+      {sourceLang !== targetLang && (
+        <>
+          <span className="font-semibold text-sm mt-1 text-gray-500">
+            {sub.title}
+          </span>
+          <span className="text-xs text-gray-400">
+            {sub.desc}
+          </span>
+        </>
+      )}
+    </Button>
+  );
+})}
                   </div>
                 </div>
 
@@ -296,22 +358,54 @@ export default function Home() {
                     />
                   </div>
 
-                  <Button
-                    onClick={handleTranslate}
-                    disabled={isLoading || !sourceText.trim()}
-                    className="w-full h-12 text-lg"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        翻訳中...
-                      </>
-                    ) : (
-                      '翻訳する'
-                    )}
-                  </Button>
+                 {/* 音声＆カメラ */}
+<div className="grid grid-cols-2 gap-2">
+  <Button
+    onClick={startSpeechRecognition}
+    className="h-12 text-sm flex flex-col"
+  >
+    <span>
+      {sourceLang === 'ja' ? '音声🎤' :
+       sourceLang === 'es' ? 'Voz🎤' :
+       sourceLang === 'ca' ? 'Veu🎤' :
+       'Sound🎤'}
+    </span>
+  </Button>
 
+  <Button
+    onClick={handleCamera}
+    className="h-12 text-sm flex flex-col"
+  >
+    <span>
+      {sourceLang === 'ja' ? 'カメラ📷' :
+       sourceLang === 'es' ? 'Cámara📷' :
+       sourceLang === 'ca' ? 'Càmera📷' :
+       'Camera📷'}
+    </span>
+  </Button>
+</div>
+
+{/* 翻訳ボタン */}
+<Button
+  onClick={handleTranslate}
+  disabled={isLoading || !sourceText.trim()}
+  className="w-full h-14 text-lg mt-2"
+>
+  {isLoading ? (
+    <>
+      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+      翻訳中...
+    </>
+  ) : (
+    <>
+      {sourceLang === 'ja' ? '翻訳✏️' :
+       sourceLang === 'es' ? 'Traducir✏️' :
+       sourceLang === 'ca' ? 'Traduir✏️' :
+       'Translate✏️'}
+    </>
+  )}
+</Button>
+                
                   {translatedText && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
