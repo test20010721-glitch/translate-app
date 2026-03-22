@@ -201,10 +201,22 @@ export default function Home() {
       toast.loading('文字を読み取っています...');
   
       try {
-        const result = await Tesseract.recognize(imgData, 'eng+jpn+spa');
+        const result = await Tesseract.recognize(
+          imgData,
+          'jpn+eng+spa',
+          {
+            logger: (m) => console.log(m),
+          }
+        );
   
-        const text = result.data.text;
-        setSourceText(text);
+        const text = result.data.text.trim();
+
+if (!text) {
+  toast.error('文字を読み取れませんでした');
+  return;
+}
+
+setSourceText(text);
   
         toast.success('読み取り完了！');
       } catch (error) {
