@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Tesseract from 'tesseract.js';
 import { supabase, Translation } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,6 +42,7 @@ export default function Home() {
   const [history, setHistory] = useState<Translation[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
   
 
   useEffect(() => {
@@ -189,11 +191,31 @@ export default function Home() {
     return LANGUAGES.find((lang) => lang.code === code)?.flag || '';
   };
 
-  const handleCamera = () => {
-    alert('📷 カメラ機能は次のステップで追加予定（まずUIだけ作成）');
-  };
+  const handleCameraCapture = async (file: File) => {
+    const reader = new FileReader();
   
+    reader.onload = async () => {
+      const imgData = reader.result as string;
+      setImage(imgData);
+  
+      toast.loading('文字を読み取っています...');
+  
+      try {
+        const result = await Tesseract.recognize(imgData, 'eng+jpn+spa');
+  
+        const text = result.data.text;
+        setSourceText(text);
+  
+        toast.success('読み取り完了！');
+      } catch (error) {
+        toast.error('読み取り失敗');
+      }
+    };
+  
+    reader.readAsDataURL(file);
+  };
   const startSpeechRecognition = () => {
+    
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -373,17 +395,31 @@ export default function Home() {
   </Button>
 
   <Button
-    onClick={handleCamera}
-    className="h-12 text-sm flex flex-col"
-  >
-    <span>
-      {sourceLang === 'ja' ? 'カメラ📷' :
-       sourceLang === 'es' ? 'Cámara📷' :
-       sourceLang === 'ca' ? 'Càmera📷' :
-       'Camera📷'}
-    </span>
-  </Button>
+  onClick={() => document.getElementById('cameraInput')?.click()}
+  className="h-12 text-sm flex flex-col"
+>
+  <span>
+    {sourceLang === 'ja' ? 'カメラ📷' :
+     sourceLang === 'es' ? 'Cámara📷' :
+     sourceLang === 'ca' ? 'Càmera📷' :
+     'Camera📷'}
+  </span>
+</Button>
 </div>
+
+<input
+  id="cameraInput"
+  type="file"
+  accept="image/*"
+  capture="environment"
+  style={{ display: 'none' }}
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleCameraCapture(file);
+    }
+  }}
+/>
 
 {/* 翻訳ボタン */}
 <Button
