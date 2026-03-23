@@ -74,7 +74,7 @@ export default function Home() {
     setTranslatedText('');
 
     try {
-      const response = await fetch('/api/translate', {
+      const response = await fetch('/api/translate/vision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
