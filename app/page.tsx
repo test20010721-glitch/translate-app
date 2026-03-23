@@ -201,22 +201,22 @@ export default function Home() {
       toast.loading('文字を読み取っています...');
   
       try {
-        const result = await Tesseract.recognize(
-          imgData,
-          'jpn+eng+spa',
-          {
-            logger: (m) => console.log(m),
-          }
-        );
-  
-        const text = result.data.text.trim();
-
-if (!text) {
-  toast.error('文字を読み取れませんでした');
-  return;
-}
-
-setSourceText(text);
+        const res = await fetch('/api/vision', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ image: imgData }),
+        });
+        
+        const data = await res.json();
+        
+        if (!data.text) {
+          toast.error('文字を読み取れませんでした');
+          return;
+        }
+        
+        setSourceText(data.text);
   
         toast.success('読み取り完了！');
       } catch (error) {
@@ -226,6 +226,9 @@ setSourceText(text);
   
     reader.readAsDataURL(file);
   };
+
+  
+
   const startSpeechRecognition = () => {
     
     const SpeechRecognition =
