@@ -26,40 +26,7 @@ Google翻訳のようなUIを持つ、AI駆動の自然な翻訳アプリケー�
 - OpenAI APIキー
 - Supabase プロジェクト（既に設定済み）
 
-## セットアップ手順
-
-### 1. 依存パッケージのインストール
-
-```bash
-npm install
-```
-
-### 2. 環境変数の設定
-
-`.env`ファイルを開き、OpenAI APIキーを設定してください：
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://hkqssnszfzpcsynjualf.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-OPENAI_API_KEY=your_actual_openai_api_key_here
-```
-
-**OpenAI APIキーの取得方法:**
-
-1. [OpenAI Platform](https://platform.openai.com/)にアクセス
-2. アカウントを作成またはログイン
-3. APIキーセクションで新しいキーを作成
-4. 作成したキーを`.env`ファイルに貼り付け
-
-### 3. 開発サーバーの起動
-
-```bash
-npm run dev
-```
-
-ブラウザで `http://localhost:3000` にアクセスしてください。
-
+  
 ## 使い方
 
 ### 基本的な翻訳
