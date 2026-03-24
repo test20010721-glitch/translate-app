@@ -192,6 +192,22 @@ export default function Home() {
       return 'Enter text...';
     };
 
+    const getStyleLabel = (lang: string) => {
+      if (lang === 'ja') return '翻訳スタイル';
+      if (lang === 'en') return 'Translation Style';
+      if (lang === 'es') return 'Estilo de traducción';
+      if (lang === 'ca') return 'Estil de traducció';
+      return 'Style';
+    };
+
+    const getHistoryLabel = (lang: string) => {
+      if (lang === 'ja') return '翻訳履歴';
+      if (lang === 'en') return 'History';
+      if (lang === 'es') return 'Historial';
+      if (lang === 'ca') return 'Historial';
+      return 'History';
+    };
+
   const getLanguageFlag = (code: string) => {
     return LANGUAGES.find((lang) => lang.code === code)?.flag || '';
   };
@@ -263,9 +279,9 @@ export default function Home() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">
-                    翻訳スタイル
-                  </label>
+                <label className="block text-sm font-medium mb-2">
+  {getStyleLabel(sourceLang)}
+</label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {TONES.map((t) => {
   const main = getToneLabel(t.value, sourceLang);
@@ -376,7 +392,9 @@ export default function Home() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="h-5 w-5 text-gray-600" />
-                  <h2 className="text-lg font-semibold">翻訳履歴</h2>
+                  <h2 className="text-lg font-semibold">
+  {getHistoryLabel(sourceLang)}
+</h2>
                 </div>
 
                 <div className="space-y-2 max-h-[600px] overflow-y-auto">
