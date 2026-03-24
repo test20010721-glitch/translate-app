@@ -182,7 +182,15 @@ export default function Home() {
 
   const getLanguageName = (code: string) => {
     return LANGUAGES.find((lang) => lang.code === code)?.name || code;
-  };
+};
+
+    const getPlaceholder = (lang: string) => {
+      if (lang === 'ja') return '翻訳したいテキストを入力してください...';
+      if (lang === 'en') return 'Enter text to translate...';
+      if (lang === 'es') return 'Introduce el texto a traducir...';
+      if (lang === 'ca') return 'Introdueix el text a traduir...';
+      return 'Enter text...';
+    };
 
   const getLanguageFlag = (code: string) => {
     return LANGUAGES.find((lang) => lang.code === code)?.flag || '';
@@ -306,7 +314,7 @@ export default function Home() {
                     <Textarea
                       value={sourceText}
                       onChange={(e) => setSourceText(e.target.value)}
-                      placeholder="翻訳したいテキストを入力してください..."
+                      placeholder={getPlaceholder(sourceLang)}
                       className="min-h-[200px] resize-none text-base"
                       maxLength={5000}
                     />
