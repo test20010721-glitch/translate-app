@@ -40,7 +40,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [history, setHistory] = useState<Translation[]>([]);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   
 
   useEffect(() => {
@@ -62,20 +61,21 @@ export default function Home() {
     }
   };
 
-
   const handleTranslate = async () => {
     if (!sourceText.trim()) {
       toast.error('翻訳するテキストを入力してください');
       return;
     }
-  
+
     setIsLoading(true);
     setTranslatedText('');
-  
+
     try {
       const response = await fetch('/api/translate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           text: sourceText,
           sourceLang,
@@ -83,66 +83,41 @@ export default function Home() {
           tone,
         }),
       });
-  
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-  
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Translation failed');
+      }
+
       setTranslatedText(data.translatedText);
-  
-      await supabase.from('translations').insert({
-        source_lang: sourceLang,
-        target_lang: targetLang,
-        source_text: sourceText,
-        translated_text: data.translatedText,
-        tone,
-      });
-  
-      loadHistory();
+
+      const { error: insertError } = await supabase
+        .from('translations')
+        .insert({
+          source_lang: sourceLang,
+          target_lang: targetLang,
+          source_text: sourceText,
+          translated_text: data.translatedText,
+          tone,
+        });
+
+      if (insertError) {
+        console.error('Error saving to history:', insertError);
+      } else {
+        loadHistory();
+      }
+
       toast.success('翻訳が完了しました');
     } catch (error) {
-      toast.error('翻訳に失敗しました');
+      console.error('Translation error:', error);
+      toast.error(
+        error instanceof Error ? error.message : '翻訳に失敗しました'
+      );
     } finally {
       setIsLoading(false);
     }
   };
-
-    
-  const startSpeechRecognition = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-  
-    if (!SpeechRecognition) {
-      alert('このブラウザは音声認識に対応していません');
-      return;
-    }
-  
-    const recognition = new SpeechRecognition();
-  
-    recognition.lang =
-      sourceLang === 'ja'
-        ? 'ja-JP'
-        : sourceLang === 'es'
-        ? 'es-ES'
-        : sourceLang === 'ca'
-        ? 'ca-ES'
-        : 'en-US';
-  
-    recognition.interimResults = false;
-  
-    setIsListening(true);
-    recognition.start();
-  
-    recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      setSourceText(text);
-      setIsListening(false);
-    };
-  
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-  };
-
 
   const handleSwapLanguages = () => {
     setSourceLang(targetLang);
@@ -359,72 +334,9 @@ export default function Home() {
                       className="min-h-[200px] resize-none text-base"
                       maxLength={5000}
                     />
-                    <Button
-  onClick={startSpeechRecognition}
-  variant="outline"
-  className="w-full mt-2"
->
-  {isListening ? '聞き取り中...' : '🎤 音声入力'}
-</Button>
                   </div>
 
-
-                  <label className="block mt-2">
-  <span className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg inline-block">
-    📸 カメラで読み取る
-  </span>
-
-  <input
-    type="file"
-    accept="image/*"
-    capture="environment"
-    className="hidden"
-    onChange={async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/ocr', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      setSourceText(data.text);
-
-      
-      // 自動翻訳（入れた方が便利）
-      handleTranslate();
-    }}
-  />
-</label>
-
-                  <input
-  type="file"
-  accept="image/*"
-  className="mt-2"
-  onChange={async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/api/ocr', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await res.json();
-    setSourceText(data.text);
-  }}
-/>
-
                 
-
 
 {/* 翻訳ボタン */}
 <Button
